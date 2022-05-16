@@ -96,6 +96,7 @@ class FanspeedS7(FanspeedEnum):
     Standard = 102
     Medium = 103
     Turbo = 104
+    Auto = 106
 
 
 class WaterFlow(enum.Enum):
@@ -643,7 +644,7 @@ class RoborockVacuum(Device, VacuumInterface):
                 fanspeeds = FanspeedV1
         elif self.model == ROCKROBO_E2:
             fanspeeds = FanspeedE2
-        elif self.model == ROCKROBO_S7:
+        elif self.model == ROCKROBO_S7 or self.model == ROCKROBO_S7_MAXV:
             fanspeeds = FanspeedS7
         else:
             fanspeeds = FanspeedV2
@@ -651,6 +652,28 @@ class RoborockVacuum(Device, VacuumInterface):
         _LOGGER.debug("Using fanspeeds %s for %s", fanspeeds, self.model)
 
         return _enum_as_dict(fanspeeds)
+
+    @command()
+    def mop_intensity_presets(self) -> Dict[str, int]:
+        """Return dictionary containing supported mop scrub intensities/water flow
+        settings."""
+
+        def _enum_as_dict(cls):
+            return {x.name: x.value for x in list(cls)}
+
+        if self.model is None:
+            return _enum_as_dict(WaterFlow)
+
+        mop_intensities: Type[enum.Enum] = WaterFlow
+
+        if self.model == ROCKROBO_S7 or self.model == ROCKROBO_S7_MAXV:
+            mop_intensities = MopIntensity
+
+        _LOGGER.debug(
+            "Using mopping intensities %s for %s", mop_intensities, self.model
+        )
+
+        return _enum_as_dict(mop_intensities)
 
     @command()
     def sound_info(self):

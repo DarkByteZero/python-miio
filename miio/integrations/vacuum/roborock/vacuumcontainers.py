@@ -37,7 +37,11 @@ error_codes = {  # from vacuum_cleaner-EN.pdf
     22: "Clean the dock charging contacts",
     23: "Docking station not reachable",
     24: "No-go zone or invisible wall detected",
+    38: "Check clean water tank, refill as needed",
+    39: "Check dirty water tank, empty as needed",
 }
+
+# TODO: add more error codes
 
 
 class VacuumStatus(DeviceStatus):
@@ -113,6 +117,7 @@ class VacuumStatus(DeviceStatus):
             17: "Zoned cleaning",
             18: "Segment cleaning",
             22: "Emptying the bin",  # on s7+, see #1189
+            26: "Washing the mop",  # on s7+ maxv ultra
             100: "Charging complete",
             101: "Device offline",
         }
@@ -143,6 +148,20 @@ class VacuumStatus(DeviceStatus):
     def fanspeed(self) -> int:
         """Current fan speed."""
         return int(self.data["fan_power"])
+
+    @property
+    def mop_intensity(self) -> Optional[int]:
+        """Current water intensity (also scrubbing)."""
+        if "water_box_mode" in self.data:
+            return int(self.data["water_box_mode"])
+        return None
+
+    @property
+    def mop_mode(self) -> Optional[int]:
+        """Current mop mode."""
+        if "mop_mode" in self.data:
+            return int(self.data["mop_mode"])
+        return None
 
     @property
     def clean_time(self) -> timedelta:
